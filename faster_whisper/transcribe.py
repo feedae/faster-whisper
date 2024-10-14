@@ -520,14 +520,16 @@ class BatchedInferencePipeline:
         audio_segments = torch.nested.nested_tensor(audio_segments).to_padded_tensor(
             padding=0
         )
-        features = torch.stack(
-            [
+        features_list = [
                 self.model.feature_extractor(audio_segment, to_cpu=to_cpu)[
                     ..., : self.model.feature_extractor.nb_max_frames
                 ]
                 for audio_segment in audio_segments
             ]
-        )
+        if len(features_list) > 0:
+            features = torch.stack(features_list)
+        else:
+            features = []
 
         segments = self._batched_segments_generator(
             features,
