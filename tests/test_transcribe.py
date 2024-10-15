@@ -39,10 +39,8 @@ def test_transcribe(jfk_path):
     assert segment.text == "".join(word.word for word in segment.words)
     assert segment.start == segment.words[0].start
     assert segment.end == segment.words[-1].end
-    batched_model = BatchedInferencePipeline(model=model)
-    result, info = batched_model.transcribe(
-        jfk_path, word_timestamps=True, vad_filter=False
-    )
+    batched_model = BatchedInferencePipeline(model=model, use_vad_model=False)
+    result, info = batched_model.transcribe(jfk_path, word_timestamps=True)
     assert info.language == "en"
     assert info.language_probability > 0.7
     segments = []
@@ -70,7 +68,7 @@ def test_batched_transcribe(physcisworks_path):
             {"start": segment.start, "end": segment.end, "text": segment.text}
         )
     # number of near 30 sec segments
-    assert len(segments) == 7
+    assert len(segments) == 8
 
     result, info = batched_model.transcribe(
         physcisworks_path,
@@ -84,7 +82,7 @@ def test_batched_transcribe(physcisworks_path):
         segments.append(
             {"start": segment.start, "end": segment.end, "text": segment.text}
         )
-    assert len(segments) > 7
+    assert len(segments) > 8
 
 
 def test_prefix_with_timestamps(jfk_path):
